@@ -1,0 +1,19 @@
+[Unit]
+Description=bilbrist
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+RestartSec=10
+User=stefanos
+Group=stefanos
+WorkingDirectory=/srv/bilbrist
+ExecStart=/usr/local/bin/gunicorn --certfile=/srv/bilbrist/secrets/ssl/cert.pem --keyfile=/srv/bilbrist/secrets/ssl/key.pem --bind :3000  --workers 2 --access-logfile - app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

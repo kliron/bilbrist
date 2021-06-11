@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block main %}
+<div>
+    <form method="POST" action="/new_post">
+        <label>
+            <textarea name="posting" placeholder="New post" class="textarea is-primary" rows="6" cols="52vl"></textarea>
+        </label>
+        <br />
+        <div class="columns">
+            <div class="column is-three-quarters"></div>
+            <div class="column is-one-quarter has-text-right">
+                <button type="submit" class="button is-primary">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="columns">
+
+</div>
+
+<div>
+    <form method="POST" action="save_post">
+        <div class="columns">
+            <div class="column is-2">
+                <label>
+                    <input name="district" type="number" placeholder="District" class="input" />
+                </label>
+            </div>
+            <div class="column is-2">
+                <button type="submit" class="button is-primary">Save</button>
+            </div>
+            <div class="column" id="messages" style="color:lightseagreen;font-weight: bold;">
+                {% for message in get_flashed_messages(category_filter=['message']) %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="container">
+    <div class="is-pulled-right">
+        <b>Page {{ page }} of {{ total_pages }}</b>
+        <br />
+        {% if page > 1 %}
+        <a href="/{{ page-1 }}" class="button"><b>&lt;</b></a>
+        {% endif %}
+        {% if page < total_pages %}
+        <a href="/{{ page+1 }}" class="button"><b>&gt;</b></a>
+        {% endif %}
+    </div>
+</div>
+
+<table class="table is-fullwidth is-narrow">
+    <thead>
+    <tr>
+        <th>Time</th>
+        <th>Day</th>
+        <th>Month</th>
+        <th>District</th>
+        <th>id</th>
+    </tr>
+    {% for row in data %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+        <td title="{{ row[4] }}"><a href="/edit_post/{{row[5]}}" style="color:orange;font-weight:bold;">{{ row[5] }}</a></td>
+        <td>
+            <form method="POST" action="delete_post" onsubmit="return confirm('Are you sure you want to delete this entry?')">
+                <input type="hidden" name="page" value="{{ page }}">
+                <input type="hidden" name="rowid" value="{{ row[5] }}">
+                <button type="submit" class="button is-danger is-small"><b>x</b></button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </thead>
+</table>
+{% endblock %}
+
+{% block footer %}
+<div class="is-family-monospace has-text-centered" style="color: #888;font-weight: bold;">
+    {% if latest_entry %}
+    <small>Latest change at {{ latest_entry.split('.')[0] }}</small>
+    {% else %}
+    <small>No entries</small>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="application/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get all "navbar-burger" elements
+        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+        // Check if there are any navbar burgers
+        if ($navbarBurgers.length > 0) {
+            // Add a click event on each of them
+            $navbarBurgers.forEach( el => {
+                el.addEventListener('click', () => {
+                    // Get the target from the "data-target" attribute
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
+                    // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                    el.classList.toggle('is-active');
+                    $target.classList.toggle('is-active');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

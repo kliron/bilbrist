@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bilbrist</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+</head>
+<body>
+    <div class="columns">
+        <div class="column is-1"></div>
+        <div class="column">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarContent">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                <div id="navbarContent" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="/" style="color:steelblue"><b>Home</b></a>
+                        <a class="navbar-item" href="/results" style="color:steelblue"><b>Results</b></a>
+                        <a class="navbar-item" href="/download" style="color:steelblue"><b>Download</b></a>
+                    </div>
+                    <div class="navbar-end"></div>
+                </div>
+            </nav>
+        </div>
+        <div class="column is-1"></div>
+    </div>
+
+    <div class="columns has-text-centered">
+        <div id="errors" class="column" style="color:red;font-weight: bold;">
+            {% for error in get_flashed_messages(category_filter=['error']) %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="columns">
+        <div class="column is-1"></div>
+        <div id="main" class="column">
+            {% block main %}{% endblock %}
+        </div>
+        <div class="column is-1"></div>
+    </div>
+</body>
+{% block style %}{% endblock %}
+
+<footer class="footer" style="background:#fff">
+    <div class="columns">
+        <div class="column is-1"></div>
+        <div class="column">
+            {% block footer %}{% endblock %}
+        </div>
+        <div class="column is-1"></div>
+    </div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</html>
