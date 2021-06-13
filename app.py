@@ -204,7 +204,9 @@ def results():
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
     time_now = now.time()
-    intervals = [('08:00', '11:59'), ('12:00', '15:59'), ('16:00', '19:59'), ('20:00', '23:59'), ('00:00', '03:59'), ('04:00', '07:59')]
+    intervals = [('00:00', '01:59'), ('02:00', '03:59'), ('04:00', '06:59'), ('07:00', '09:59'), ('10:00', '11:59'),
+                 ('12:00', '13:59'), ('14:00', '15:59'), ('16:00', '17:59'), ('18:00', '19:59'), ('20:00', '21:59'),
+                 ('22:00', '23:59')]
     interval_now = None
     for interval in intervals:
         if datetime.strptime(interval[0], '%H:%M').time() <= time_now <= datetime.strptime(interval[1], '%H:%M').time():
@@ -213,21 +215,20 @@ def results():
 
     # This is to be able to use `between_time()`
     df = df.set_index(['date'])
-    eight_twelve = df.index.isin(df.between_time(intervals[0][0], intervals[0][1]).index)
-    twelve_sixteen = df.index.isin(df.between_time(intervals[1][0], intervals[1][1]).index)
-    sixteen_twenty = df.index.isin(df.between_time(intervals[2][0], intervals[2][1]).index)
-    twenty_zero = df.index.isin(df.between_time(intervals[3][0], intervals[3][1]).index)
-    zero_four = df.index.isin(df.between_time(intervals[4][0], intervals[4][1]).index)
-    four_eight = df.index.isin(df.between_time(intervals[5][0], intervals[5][1]).index)
+    mask = [df.index.isin(df.between_time(intervals[i][0], intervals[i][1]).index) for i in range(0, len(intervals))]
 
-    df['interval'] = np.where(eight_twelve, '08:00 - 12:00',
-                              np.where(twelve_sixteen, '12:00 - 16:00',
-                                       np.where(sixteen_twenty, '16:00 - 20:00',
-                                                np.where(twenty_zero, '20:00 - 00:00',
-                                                         np.where(twenty_zero, '20:00 - 00:00',
-                                                                  np.where(zero_four, '00:00 - 04:00',
-                                                                           np.where(four_eight, '04:00 - 08:00',
-                                                                                    'BUG! No time interval found')))))))
+    df['interval'] = np.where(mask[0], ' - '.join(intervals[0]),
+                              np.where(mask[1], ' - '.join(intervals[1]),
+                                       np.where(mask[2], ' - '.join(intervals[2]),
+                                                np.where(mask[3], ' - '.join(intervals[3]),
+                                                         np.where(mask[4], ' - '.join(intervals[4]),
+                                                                  np.where(mask[5], ' - '.join(intervals[5]),
+                                                                           np.where(mask[6], ' - '.join(intervals[6]),
+                                                                                    np.where(mask[7], ' - '.join(intervals[7]),
+                                                                                             np.where(mask[8], ' - '.join(intervals[8]),
+                                                                                                      np.where(mask[9], ' - '.join(intervals[9]),
+                                                                                                               np.where(mask[10], ' - '.join(intervals[10]),
+                                                                                                                        'BUG! No time interval found')))))))))))
 
     # Sort by district, all days and all months
     all_freqs = df.groupby(['district']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)

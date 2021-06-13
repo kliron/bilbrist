@@ -1,45 +1,100 @@
 {% extends "layout.html" %}
 {% block main %}
+<div class="columns">
+    <div class="column is-1"></div>
+    <div class="column">
+        <h4 style="font-weight: bolder;">Showing top {{ top_n }} results in each grouping</h4>
+        <br/>
+        <h4 style="font-weight: bolder;">{{ month + ' ' + weekday + 's ' + 'frequencies' }}</h4>
+        {% if data['this_months_weekday'].shape[0] > 0 %}
+        {{ data['this_months_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
 
-<div class="columns is-centered">
-  <div class="column is-1"></div>
-  <div class="column">
-    <h1 style="font-weight: bolder;">Showing top {{ top_n }} results in each grouping</h1>
-    <br />
-    <h1 style="font-weight: bolder;">{{ month + ' ' + weekday + 's ' + 'frequencies' }}</h1>
-    {{ data['this_months_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <br/>
 
-    <br />
-    <h1 style="font-weight: bolder;">{{ 'All ' + month + ' frequencies' }}</h1>
-    {{ data['this_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <h4 style="font-weight: bolder;">{{ 'All ' + month + ' frequencies' }}</h4>
+        {% if data['this_month'].shape[0] > 0 %}
+        {{ data['this_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
 
-    <h1 style="font-weight: bolder;">{{ 'All ' + weekday + ' frequencies' }}</h1>
-    {{ data['this_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <br/>
 
-    <h1 style="font-weight: bolder;">{{ 'All frequencies at current time interval' }}</h1>
-    {{ data['this_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <h4 style="font-weight: bolder;">{{ 'All ' + weekday + ' frequencies' }}</h4>
+        {% if data['this_weekday'].shape[0] > 0 %}
+        {{ data['this_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
 
-    <h1 style="font-weight: bolder;">Frequencies by month</h1>
-    {{ data['by_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <br/>
 
-    <h1 style="font-weight: bolder;">Frequencies by day</h1>
-    {{ data['by_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <h4 style="font-weight: bolder;">{{ 'All frequencies at current time interval' }}</h4>
+        {% if data['this_time'].shape[0] > 0 %}
+        {{ data['this_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
 
-    <h1 style="font-weight: bolder;">Frequencies by time interval</h1>
-    {{ data['by_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <br/>
 
-    <h1 style="font-weight: bolder;">Frequencies by month and day</h1>
-    {{ data['by_month_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <h4 style="font-weight: bolder;">Frequencies by month</h4>
+        {% if data['by_month'].shape[0] > 0 %}
+        {{ data['by_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
 
-    <h1 style="font-weight: bolder;">Frequencies by time interval and day</h1>
-    {{ data['by_time_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        <br/>
 
-    <h1 style="font-weight: bolder;">All frequencies</h1>
-    {{ data['all_freqs'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
-  </div>
-  <div class="column is-1"></div>
+        <h4 style="font-weight: bolder;">Frequencies by day</h4>
+        {% if data['by_day'].shape[0] > 0 %}
+        {{ data['by_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
+
+        <br/>
+
+        <h4 style="font-weight: bolder;">Frequencies by time interval</h4>
+        {% if data['by_time'].shape[0] > 0 %}
+        {{ data['by_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
+
+        <br/>
+
+        <h4 style="font-weight: bolder;">Frequencies by month and day</h4>
+        {% if data['by_month_and_day'].shape[0] > 0 %}
+        {{ data['by_month_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
+
+        <br/>
+
+        <h4 style="font-weight: bolder;">Frequencies by time interval and day</h4>
+        {% if data['by_time_and_day'].shape[0] > 0 %}
+        {{ data['by_time_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
+
+        <br/>
+
+        <h4 style="font-weight: bolder;">All frequencies</h4>
+        {% if data['all_freqs'].shape[0] > 0 %}
+        {{ data['all_freqs'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {% else %}
+        <p>No data to show</p>
+        {% endif %}
+    </div>
+    <div class="column is-1"></div>
 </div>
-
 
 {% endblock %}
 
