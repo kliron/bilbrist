@@ -54,6 +54,10 @@ def verify_password(username, password):
 @app.route('/<int:page>')
 @auth.login_required
 def root(page):
+    sortable = ['rowid', 'time', 'day', 'month', 'district', 'date']
+    order_by = request.args.get('o')
+    print(order_by)
+    order_by = order_by if order_by in sortable else sortable[0]
     cur = get_db().cursor()
     cur.execute('SELECT COUNT(*) FROM bilbrist')
     total_rows = cur.fetchone()[0]
@@ -65,7 +69,7 @@ def root(page):
     page = page if page > 0 else 1
     offset = 0 if page == 1 else (page - 1) * QUERY_LIMIT
     stmt = cur.execute(
-        'SELECT time, day, month, district, date, rowid FROM bilbrist ORDER BY rowid DESC LIMIT ? OFFSET ?',
+        f'SELECT time, day, month, district, date, rowid FROM bilbrist ORDER BY {order_by} DESC LIMIT ? OFFSET ?',
         (QUERY_LIMIT, offset))
     data = []
     for row in stmt:
@@ -181,9 +185,10 @@ def do_edit_post(rowid):
 def download():
     con = get_db()
     cur = con.cursor()
-    cur.execute('SELECT time, day, district, date, rowid FROM bilbrist ORDER BY rowid DESC')
+    cur.execute('SELECT time, day, month, district, date, rowid FROM bilbrist ORDER BY rowid DESC')
     rows = cur.fetchall()
-    csv = '\n'.join([CSV_SEP.join([str(col) for col in row]) for row in rows])
+    colnames = CSV_SEP.join([desc[0] for desc in cur.description])
+    csv = colnames + '\n' + '\n'.join([CSV_SEP.join([str(col) for col in row]) for row in rows])
     return Response(csv, mimetype='text/csv')
 
 
