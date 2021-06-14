@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block main %}
 <div class="columns">
-    <div class="column is-3">
+    <div class="column">
         <ul id="tab-selector">
             <li class="active"><a href="#" data-target="t0">{{ month + ' ' + weekday + 's' }}</a></li>
             <li><a href="#" data-target="t1">{{ 'Every ' + month }}</a></li>
@@ -15,7 +15,7 @@
             <li><a href="#" data-target="t9">Ungrouped</a></li>
         </ul>
     </div>
-    <div class="column is-9">
+    <div class="column">
         <p style="font-size: small;">Showing top {{ top_n }} results in each grouping</p>
 
         <br/>

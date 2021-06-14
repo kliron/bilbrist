@@ -20,7 +20,7 @@ QUERY_LIMIT = 50
 district_extractor_rgx = re.compile(r'([0-9]{3})\s*[\{\[\(][^0-9.]*?rt', re.MULTILINE)
 CSV_SEP = ','
 RESULTS_DIR = 'results'
-TOP_N_RESULTS = 20
+TOP_N_RESULTS = 40
 
 with open('secrets/httpauth.txt', 'r') as f:
     passw = f.read().replace('\n', '')
