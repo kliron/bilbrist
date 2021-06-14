@@ -53,7 +53,7 @@
     </div>
 </div>
 
-<table class="table is-fullwidth is-narrow">
+<table class="table is-fullwidth is-narrow is-striped is-hoverable">
     <thead>
     <tr>
         <th><a href="/?o=time">Time</a></th>
@@ -62,6 +62,8 @@
         <th><a href="/?o=district">District</a></th>
         <th><a href="/?o=rowid">id</a></th>
     </tr>
+    </thead>
+    <tbody>
     {% for row in data %}
     <tr>
         <td>{{ row[0] }}</td>
@@ -78,7 +80,7 @@
         </td>
     </tr>
     {% endfor %}
-    </thead>
+    </tbody>
 </table>
 {% endblock %}
 

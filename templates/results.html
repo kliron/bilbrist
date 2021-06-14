@@ -7,7 +7,7 @@
         <br/>
         <h4 style="font-weight: bolder;">{{ month + ' ' + weekday + 's ' + 'frequencies' }}</h4>
         {% if data['this_months_weekday'].shape[0] > 0 %}
-        {{ data['this_months_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['this_months_weekday'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -16,7 +16,7 @@
 
         <h4 style="font-weight: bolder;">{{ 'All ' + month + ' frequencies' }}</h4>
         {% if data['this_month'].shape[0] > 0 %}
-        {{ data['this_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['this_month'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -25,7 +25,7 @@
 
         <h4 style="font-weight: bolder;">{{ 'All ' + weekday + ' frequencies' }}</h4>
         {% if data['this_weekday'].shape[0] > 0 %}
-        {{ data['this_weekday'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['this_weekday'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -34,7 +34,7 @@
 
         <h4 style="font-weight: bolder;">{{ 'All frequencies at current time interval' }}</h4>
         {% if data['this_time'].shape[0] > 0 %}
-        {{ data['this_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['this_time'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -43,7 +43,7 @@
 
         <h4 style="font-weight: bolder;">Frequencies by month</h4>
         {% if data['by_month'].shape[0] > 0 %}
-        {{ data['by_month'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['by_month'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -52,7 +52,7 @@
 
         <h4 style="font-weight: bolder;">Frequencies by day</h4>
         {% if data['by_day'].shape[0] > 0 %}
-        {{ data['by_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['by_day'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -61,7 +61,7 @@
 
         <h4 style="font-weight: bolder;">Frequencies by time interval</h4>
         {% if data['by_time'].shape[0] > 0 %}
-        {{ data['by_time'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['by_time'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -70,7 +70,7 @@
 
         <h4 style="font-weight: bolder;">Frequencies by month and day</h4>
         {% if data['by_month_and_day'].shape[0] > 0 %}
-        {{ data['by_month_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['by_month_and_day'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -79,7 +79,7 @@
 
         <h4 style="font-weight: bolder;">Frequencies by time interval and day</h4>
         {% if data['by_time_and_day'].shape[0] > 0 %}
-        {{ data['by_time_and_day'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['by_time_and_day'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
@@ -88,7 +88,7 @@
 
         <h4 style="font-weight: bolder;">All frequencies</h4>
         {% if data['all_freqs'].shape[0] > 0 %}
-        {{ data['all_freqs'].to_html(index=False, border=0, classes=('table', 'striped', 'is-narrow'))|safe }}
+        {{ data['all_freqs'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
         {% else %}
         <p>No data to show</p>
         {% endif %}
