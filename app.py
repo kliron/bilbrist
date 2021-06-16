@@ -10,6 +10,7 @@ import string
 import calendar
 import pandas as pd
 import numpy as np
+from district_names import district_names
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -201,6 +202,8 @@ def results():
     slurp = cur.execute('SELECT time, day, month, district, date, rowid From bilbrist')
     cols = [col[0] for col in slurp.description]
     df = pd.DataFrame.from_records(data=slurp.fetchall(), columns=cols)
+    df['dname'] = df['district'].apply(lambda code: district_names.get(code, ['Unknown'])[0])
+    df['district'] = df['district'] + ' - ' + df['dname']
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
     time_now = now.time()
