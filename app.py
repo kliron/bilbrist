@@ -207,8 +207,7 @@ def results():
     slurp = cur.execute('SELECT time, day, month, district, date, rowid From bilbrist')
     cols = [col[0] for col in slurp.description]
     df = pd.DataFrame.from_records(data=slurp.fetchall(), columns=cols)
-    df['dname'] = df['district'].apply(lambda code: district_names.get(code, ['Unknown'])[0])
-    df['district'] = df['district'] + ' - ' + df['dname']
+    df['area'] = df['district'].apply(lambda code: district_names.get(code, ['Unknown'])[0])
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
     time_now = now.time()
@@ -239,12 +238,12 @@ def results():
                                                                                                                         'BUG! No time interval found')))))))))))
 
     # Sort by district, all days and all months
-    all_freqs = df.groupby(['district']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_month = df.groupby(['district', 'month']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_day = df.groupby(['district', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_time = df.groupby(['district', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_time_and_day = df.groupby(['district', 'interval', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_month_and_day = df.groupby(['district', 'month', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    all_freqs = df.groupby(['district', 'area']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_month = df.groupby(['district', 'area', 'month']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_day = df.groupby(['district', 'area', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_time = df.groupby(['district', 'area', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_time_and_day = df.groupby(['district', 'area', 'interval', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_month_and_day = df.groupby(['district', 'area', 'month', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
 
     this_month = by_month[by_month['month'] == calendar.month_name[now.month]]
     this_weekday = by_day[by_day['day'] == calendar.day_name[now.weekday()]]

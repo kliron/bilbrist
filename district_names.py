@@ -230,7 +230,7 @@ district_names = {
     '184': ['Ostra Reals Gymnasium'],
     '185': ['Gardet'],
     '186': ['Radiohuset'],
-    '187': ['DJurgárdsslätten Skansen'],
+    '187': ['Djurgårdsslätten Skansen'],
     '188': ['Tekniska Museet'],
     '191': ['Färjeterminaler Silja Line/Talink'],
     '192': ['Stora Skuggan'],
