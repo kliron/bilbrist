@@ -75,7 +75,12 @@ def root(page):
     data = []
     for row in stmt:
         data.append(row)
-    return render_template('index.html', data=data, page=page, total_pages=total_pages, latest_entry=latest_entry)
+    return render_template('index.html',
+                           data=data,
+                           page=page,
+                           total_pages=total_pages,
+                           latest_entry=latest_entry,
+                           district_names=district_names)
 
 
 @app.route('/new_post', methods=['POST'])

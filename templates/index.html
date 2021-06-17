@@ -45,10 +45,18 @@
         <b>Page {{ page }} of {{ total_pages }}</b>
         <br />
         {% if page > 1 %}
-        <a href="/{{ page-1 }}" class="button"><b>&lt;</b></a>
+        <a title="First page" href="/{{ 1 }}" class="button"><b>&lt;&lt;</b></a>
+        <a title="Previous page" href="/{{ page-1 }}" class="button"><b>&lt;</b></a>
+        {% else %}
+        <button title="First page" class="button" disabled><b>&lt;&lt;</b></button>
+        <button title="Previous page" class="button" disabled><b>&lt;</b></button>
         {% endif %}
         {% if page < total_pages %}
-        <a href="/{{ page+1 }}" class="button"><b>&gt;</b></a>
+        <a title="Next page" href="/{{ page+1 }}" class="button"><b>&gt;</b></a>
+        <a title="Last page" href="/{{ total_pages }}" class="button"><b>&gt;&gt;</b></a>
+        {% else %}
+        <button title="First page" class="button" disabled><b>&gt;&gt;</b></button>
+        <button title="Previous page" class="button" disabled><b>&gt;</b></button>
         {% endif %}
     </div>
 </div>
@@ -60,17 +68,17 @@
         <th><a href="/?o=day">Day</a></th>
         <th><a href="/?o=month">Month</a></th>
         <th><a href="/?o=district">District</a></th>
-        <th><a href="/?o=rowid">id</a></th>
+        <th><a href="/?o=district">Area</a></th>
     </tr>
     </thead>
     <tbody>
     {% for row in data %}
-    <tr>
+    <tr title="{{ row[5] }}" style="cursor: pointer;color:#555;">
         <td>{{ row[0] }}</td>
         <td>{{ row[1] }}</td>
         <td>{{ row[2] }}</td>
-        <td>{{ row[3] }}</td>
-        <td title="{{ row[4] }}"><a href="/edit_post/{{row[5]}}" style="color:orange;font-weight:bold;">{{ row[5] }}</a></td>
+        <td title="{{ row[4] }}"><a href="/edit_post/{{row[5]}}" style="color:darkorange;font-weight: bold;">{{ row[3] }}</a></td>
+        <td>{{ district_names.get(row[3], ['Unknown'])[0] }}</td>
         <td>
             <form method="POST" action="delete_post" onsubmit="return confirm('Are you sure you want to delete this entry?')">
                 <input type="hidden" name="page" value="{{ page }}">
