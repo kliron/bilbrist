@@ -244,36 +244,33 @@ def results():
     by_time = df.groupby(['district', 'area', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
     by_time_and_day = df.groupby(['district', 'area', 'interval', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
     by_month_and_day = df.groupby(['district', 'area', 'month', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_month_day_and_time = df.groupby(['district', 'area', 'month', 'day', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
 
     this_month = by_month[by_month['month'] == calendar.month_name[now.month]]
     this_weekday = by_day[by_day['day'] == calendar.day_name[now.weekday()]]
     this_time = by_time[by_time['interval'] == interval_now]
     this_months_weekday = by_month_and_day[(by_month_and_day['month'] == calendar.month_name[now.month]) &
                                            (by_month_and_day['day'] == calendar.day_name[now.weekday()])]
+    this_months_weekday_and_time = by_month_day_and_time[(by_month_day_and_time['month'] == calendar.month_name[now.month]) &
+                                                         (by_month_day_and_time['day'] == calendar.day_name[now.weekday()])]
+
+    this_months_weekday_by_interval = this_months_weekday_and_time.sort_values(by=['interval', 'counts'], ascending=[True, False])
 
     month = calendar.month_name[datetime.now().month]
     weekday = calendar.day_name[datetime.now().weekday()]
 
-    # Can't get the code below to work
-    # all_freqs.style.set_table_attributes("style='display:inline'").set_caption('All frequenices')
-    # by_month.style.set_table_attributes("style='display:inline'").set_caption('Frequencies by month')
-    # by_day.style.set_table_attributes("style='display:inline'").set_caption('Frequencies by day')
-    # by_month_and_day.style.set_table_attributes("style='display:inline'").set_caption('Frequencies by month and day')
-    # this_month.style.set_table_attributes("style='display:inline'").set_caption('Frequencies on ' + month)
-    # this_weekday.style.set_table_attributes("style='display:inline'").set_caption('Frequencies on ' + weekday + 's')
-    # this_months_weekday.style.set_table_attributes("style='display:inline'").set_caption('Frequenices on ' + month + ' ' + weekday + 's')
-
     data = {
-        'all_freqs': all_freqs.head(TOP_N_RESULTS),
-        'by_month': by_month.head(TOP_N_RESULTS),
-        'by_day': by_day.head(TOP_N_RESULTS),
-        'by_time': by_time.head(TOP_N_RESULTS),
-        'by_time_and_day': by_time_and_day.head(TOP_N_RESULTS),
-        'by_month_and_day': by_month_and_day.head(TOP_N_RESULTS),
-        'this_month': this_month.head(TOP_N_RESULTS),
-        'this_weekday': this_weekday.head(TOP_N_RESULTS),
-        'this_time': this_time.head(TOP_N_RESULTS),
-        'this_months_weekday': this_months_weekday.head(TOP_N_RESULTS)
+        'all_freqs': all_freqs,
+        'by_month': by_month,
+        'by_day': by_day,
+        'by_time': by_time,
+        'by_time_and_day': by_time_and_day,
+        'by_month_and_day': by_month_and_day,
+        'this_month': this_month,
+        'this_weekday': this_weekday,
+        'this_time': this_time,
+        'this_months_weekday': this_months_weekday,
+        'this_months_weekday_by_interval': this_months_weekday_by_interval
     }
 
     return render_template('results.html', data=data, month=month, weekday=weekday, top_n=TOP_N_RESULTS)
