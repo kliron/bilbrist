@@ -1,23 +1,38 @@
 {% extends "layout.html" %}
 {% block main %}
-<div class="columns">
-    <div class="column">
-        <ul id="tab-selector">
-            <li class="active"><a href="#" data-target="t0">{{ month + ' ' + weekday + 's by interval' }}</a></li>
-            <li><a href="#" data-target="t1">{{ month + ' ' + weekday + 's ' + '(all times)' }}</a></li>
-            <li><a href="#" data-target="t2">{{ 'Every ' + month }}</a></li>
-            <li><a href="#" data-target="t3">{{ 'Every ' + weekday }}</a></li>
-            <li><a href="#" data-target="t4">Current time</a></li>
-            <li><a href="#" data-target="t5">By month</a></li>
-            <li><a href="#" data-target="t6">By day</a></li>
-            <li><a href="#" data-target="t7">By time interval</a></li>
-            <li><a href="#" data-target="t8">By month and day</a></li>
-            <li><a href="#" data-target="t9">By day and time</a></li>
-            <li><a href="#" data-target="t10">Ungrouped</a></li>
-        </ul>
-    </div>
-    <div class="column">
-        <p style="font-size: small;">Showing all results in each grouping</p>
+<div class="columns is-centered is-mobile">
+    <div class="column is-multiline is-four-fifths">
+        <div id="dropdown" class="dropdown">
+            <div class="dropdown-trigger">
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                    <span>Select view</span>
+                    <span class="icon is-small">
+              </span>
+                </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content" id="tab-selector">
+                    <a href="#" class="dropdown-item is-active" data-target="t0">{{ month + ' ' + weekday + 's by interval' }}</a>
+                    <a href="#" class="dropdown-item" data-target="t1">{{ month + ' ' + weekday + 's ' + '(all times)' }}</a>
+                    <a href="#" class="dropdown-item" data-target="t2">{{ 'Every ' + month }}</a>
+                    <a href="#" class="dropdown-item" data-target="t3">{{ 'Every ' + weekday }}</a>
+                    <a href="#" class="dropdown-item" data-target="t4">Current time</a>
+                    <a href="#" class="dropdown-item" data-target="t5">By month</a>
+                    <a href="#" class="dropdown-item" data-target="t6">By day</a>
+                    <a href="#" class="dropdown-item" data-target="t7">By time interval</a>
+                    <a href="#" class="dropdown-item" data-target="t8">By month and day</a>
+                    <a href="#" class="dropdown-item" data-target="t9">By day and time</a>
+                    <a href="#" class="dropdown-item" data-target="t10">Ungrouped</a>
+                    <hr class="dropdown-divider">
+                    <a href="#" class="dropdown-item" data-target="t11">By area code</a>
+                </div>
+            </div>
+        </div>
+
+        <br/>
+        <br/>
+
+        <h4>Showing results for {{ 'district ' + district if district else 'all districts'}}</h4>
 
         <br/>
 
@@ -120,6 +135,21 @@
                 <p>No data to show</p>
                 {% endif %}
             </div>
+
+            <div id="t11" class="hidden">
+                <h4 style="font-weight: bolder;">Enter an area code</h4>
+                <div class="columns">
+                    <div class="column is-4">
+                        <form method="POST" action="/results_for_district">
+                            <label>
+                                <input id="select-area-inp" class="input" type="number" placeholder="123" name="district" />
+                            </label>
+                            <button id="select-area-btn" type="submit" class="button is-success is-small">Show</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="area-results"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -128,13 +158,6 @@
 
 {% block style %}
 <style>
-    #tab-selector > li > a {
-        color: #666;
-    }
-    #tab-selector > li.active > a {
-        font-weight: bold;
-        color: darkorange;
-    }
     #tab-content > div.hidden {
         display: none;
     }
@@ -146,16 +169,23 @@
 {% block scripts %}
 <script type="application/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('#tab-selector > li > a').forEach(el => {
+        document.getElementById('dropdown').addEventListener('click', ev => {
+           ev.currentTarget.classList.contains('is-active') ?
+               ev.currentTarget.classList.remove('is-active') :
+               ev.currentTarget.classList.add('is-active');
+        });
+
+        document.querySelectorAll('#tab-selector > a').forEach(el => {
             let target_id = el.getAttribute('data-target');
             el.addEventListener('click', ev => {
-                document.querySelectorAll('#tab-selector > li').forEach(li => li.classList.remove('active'));
-                ev.target.parentElement.classList.add('active');
+                document.querySelectorAll('#tab-selector > a.is-active')[0].classList.remove('is-active');
+                ev.currentTarget.classList.add('is-active');
                 document.querySelectorAll('#tab-content > div').forEach(el => el.classList.add('hidden'));
                 document.getElementById(target_id).classList.remove('hidden');
             })
-        })
+        });
     });
+
 
 </script>
 {% endblock %}

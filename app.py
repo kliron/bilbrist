@@ -201,12 +201,18 @@ def download():
 @app.route('/results', methods=['GET'])
 @auth.login_required
 def results():
-    # Load all data
+    district = request.args.get('d')
+    if not district or not re.match(r'^[0-9]+$', district):
+        district = None
+
     con = get_db()
     cur = con.cursor()
-    slurp = cur.execute('SELECT time, day, month, district, date, rowid From bilbrist')
-    cols = [col[0] for col in slurp.description]
-    df = pd.DataFrame.from_records(data=slurp.fetchall(), columns=cols)
+    sql = 'SELECT time, day, month, district, date, rowid From bilbrist' if district is None else \
+        'SELECT time, day, month, district, date, rowid From bilbrist where district = ?'
+    params = [] if district is None else [district]
+    res = cur.execute(sql, params)
+    cols = [col[0] for col in res.description]
+    df = pd.DataFrame.from_records(data=res.fetchall(), columns=cols)
     df['area'] = df['district'].apply(lambda code: district_names.get(code, ['Unknown'])[0])
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
@@ -273,7 +279,14 @@ def results():
         'this_months_weekday_by_interval': this_months_weekday_by_interval
     }
 
-    return render_template('results.html', data=data, month=month, weekday=weekday, top_n=TOP_N_RESULTS)
+    return render_template('results.html', data=data, month=month, weekday=weekday, top_n=TOP_N_RESULTS, district=district)
+
+
+@app.route('/results_for_district', methods=['POST'])
+@auth.login_required
+def results_for_district():
+    district = request.form['district']
+    return redirect(f'/results?d={district}')
 
 
 if __name__ == "__main__":
