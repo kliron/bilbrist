@@ -217,9 +217,11 @@ def results():
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
     time_now = now.time()
-    intervals = [('00:00', '01:59'), ('02:00', '03:59'), ('04:00', '06:59'), ('07:00', '09:59'), ('10:00', '11:59'),
-                 ('12:00', '13:59'), ('14:00', '15:59'), ('16:00', '17:59'), ('18:00', '19:59'), ('20:00', '21:59'),
-                 ('22:00', '23:59')]
+    intervals = [('00:00', '00:59'), ('01:00', '01:59'), ('02:00', '02:59'), ('03:00', '03:59'), ('04:00', '04:59'),
+                 ('05:00', '05:59'), ('06:00', '06:59'), ('07:00', '07:59'), ('08:00', '08:59'), ('09:00', '09:59'),
+                 ('10:00', '10:59'), ('11:00', '11:59'), ('12:00', '12:59'), ('13:00', '13:59'), ('14:00', '14:59'),
+                 ('15:00', '15:59'), ('16:00', '16:59'), ('17:00', '17:59'), ('18:00', '18:59'), ('19:00', '19:59'),
+                 ('20:00', '20:59'), ('21:00', '21:59'), ('22:00', '22:59'), ('23:00', '23:59')]
     interval_now = None
     for interval in intervals:
         if datetime.strptime(interval[0], '%H:%M').time() <= time_now <= datetime.strptime(interval[1], '%H:%M').time():
@@ -241,7 +243,19 @@ def results():
                                                                                              np.where(mask[8], ' - '.join(intervals[8]),
                                                                                                       np.where(mask[9], ' - '.join(intervals[9]),
                                                                                                                np.where(mask[10], ' - '.join(intervals[10]),
-                                                                                                                        'BUG! No time interval found')))))))))))
+                                                                                                                        np.where(mask[11], ' - '.join(intervals[11]),
+                                                                                                                                 np.where(mask[12], ' - '.join(intervals[12]),
+                                                                                                                                          np.where(mask[13], ' - '.join(intervals[13]),
+                                                                                                                                                   np.where(mask[14], ' - '.join(intervals[14]),
+                                                                                                                                                            np.where(mask[15], ' - '.join(intervals[15]),
+                                                                                                                                                                     np.where(mask[16], ' - '.join(intervals[16]),
+                                                                                                                                                                              np.where(mask[17], ' - '.join(intervals[17]),
+                                                                                                                                                                                       np.where(mask[18], ' - '.join(intervals[18]),
+                                                                                                                                                                                                np.where(mask[19], ' - '.join(intervals[19]),
+                                                                                                                                                                                                         np.where(mask[20], ' - '.join(intervals[20]),
+                                                                                                                                                                                                                  np.where(mask[21], ' - '.join(intervals[21]),
+                                                                                                                                                                                                                           np.where(mask[22], ' - '.join(intervals[22]),
+                                                                                                                                                                                                                                    'BUG! No time interval found')))))))))))))))))))))))
 
     # Sort by district, all days and all months
     all_freqs = df.groupby(['district', 'area']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
