@@ -10,7 +10,11 @@ import string
 import calendar
 import pandas as pd
 import numpy as np
+from typing import Dict, List
 from district_names import district_names
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -57,7 +61,6 @@ def verify_password(username, password):
 def root(page):
     sortable = ['rowid', 'time', 'day', 'month', 'district', 'date']
     order_by = request.args.get('o')
-    print(order_by)
     order_by = order_by if order_by in sortable else sortable[0]
     cur = get_db().cursor()
     cur.execute('SELECT COUNT(*) FROM bilbrist')
@@ -213,15 +216,19 @@ def results():
     res = cur.execute(sql, params)
     cols = [col[0] for col in res.description]
     df = pd.DataFrame.from_records(data=res.fetchall(), columns=cols)
-    df['area'] = df['district'].apply(lambda code: district_names.get(code, ['Unknown'])[0])
+
+    # Concatenate area code and district name since they are 1-to-1 mappings, they are essentially a single variable
+    areas = df['district'].apply(lambda d: district_names.get(d, ['Unknown'])[0])
+    df['district'] = df['district'] + ' - ' + areas
+    
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M')
     now = datetime.now()
     time_now = now.time()
-    intervals = [('00:00', '00:59'), ('01:00', '01:59'), ('02:00', '02:59'), ('03:00', '03:59'), ('04:00', '04:59'),
-                 ('05:00', '05:59'), ('06:00', '06:59'), ('07:00', '07:59'), ('08:00', '08:59'), ('09:00', '09:59'),
-                 ('10:00', '10:59'), ('11:00', '11:59'), ('12:00', '12:59'), ('13:00', '13:59'), ('14:00', '14:59'),
-                 ('15:00', '15:59'), ('16:00', '16:59'), ('17:00', '17:59'), ('18:00', '18:59'), ('19:00', '19:59'),
-                 ('20:00', '20:59'), ('21:00', '21:59'), ('22:00', '22:59'), ('23:00', '23:59')]
+    intervals = [('00:00', '01:00'), ('01:00', '02:00'), ('02:00', '03:00'), ('03:00', '04:00'), ('04:00', '05:00'),
+                 ('05:00', '06:00'), ('06:00', '07:00'), ('07:00', '08:00'), ('08:00', '09:00'), ('09:00', '10:00'),
+                 ('10:00', '11:00'), ('11:00', '12:00'), ('12:00', '13:00'), ('13:00', '14:00'), ('14:00', '15:00'),
+                 ('15:00', '16:00'), ('16:00', '17:00'), ('17:00', '18:00'), ('18:00', '19:00'), ('19:00', '20:00'),
+                 ('20:00', '21:00'), ('21:00', '22:00'), ('22:00', '23:00'), ('23:00', '00:00')]
     interval_now = None
     for interval in intervals:
         if datetime.strptime(interval[0], '%H:%M').time() <= time_now <= datetime.strptime(interval[1], '%H:%M').time():
@@ -230,7 +237,7 @@ def results():
 
     # This is to be able to use `between_time()`
     df = df.set_index(['date'])
-    mask = [df.index.isin(df.between_time(intervals[i][0], intervals[i][1]).index) for i in range(0, len(intervals))]
+    mask = [df.index.isin(df.between_time(intervals[i][0], intervals[i][1], include_start=True, include_end=False).index) for i in range(0, len(intervals))]
 
     df['interval'] = np.where(mask[0], ' - '.join(intervals[0]),
                               np.where(mask[1], ' - '.join(intervals[1]),
@@ -255,42 +262,70 @@ def results():
                                                                                                                                                                                                          np.where(mask[20], ' - '.join(intervals[20]),
                                                                                                                                                                                                                   np.where(mask[21], ' - '.join(intervals[21]),
                                                                                                                                                                                                                            np.where(mask[22], ' - '.join(intervals[22]),
-                                                                                                                                                                                                                                    'BUG! No time interval found')))))))))))))))))))))))
+                                                                                                                                                                                                                                np.where(mask[23], ' - '.join(intervals[23]),
+                                                                                                                                                                                                                                        'BUG! No time interval found'))))))))))))))))))))))))
 
     # Sort by district, all days and all months
-    all_freqs = df.groupby(['district', 'area']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_month = df.groupby(['district', 'area', 'month']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_day = df.groupby(['district', 'area', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_time = df.groupby(['district', 'area', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_time_and_day = df.groupby(['district', 'area', 'interval', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_month_and_day = df.groupby(['district', 'area', 'month', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
-    by_month_day_and_time = df.groupby(['district', 'area', 'month', 'day', 'interval']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    all_freqs = df.groupby(['district']).size().reset_index(name='counts')
+    # Percent of all frequencies
+    all_freqs['%'] = round(100 * all_freqs['counts'] / all_freqs['counts'].sum(), 2)
+    all_freqs['percentile'] = pd.qcut(all_freqs['%'], q=100, labels=False, duplicates='drop')
+    all_freqs.sort_values(by='%', inplace=True, ascending=False)
 
-    this_month = by_month[by_month['month'] == calendar.month_name[now.month]]
-    this_weekday = by_day[by_day['day'] == calendar.day_name[now.weekday()]]
-    this_time = by_time[by_time['interval'] == interval_now]
-    this_months_weekday = by_month_and_day[(by_month_and_day['month'] == calendar.month_name[now.month]) &
-                                           (by_month_and_day['day'] == calendar.day_name[now.weekday()])]
-    this_months_weekday_and_time = by_month_day_and_time[(by_month_day_and_time['month'] == calendar.month_name[now.month]) &
-                                                         (by_month_day_and_time['day'] == calendar.day_name[now.weekday()])]
+    def calculate_grouped_percentage_and_centile(d: pd.DataFrame, group_by: List[str]) -> pd.DataFrame:
+        d_pct = d.groupby(group_by).agg({'counts': 'sum'})\
+            .groupby(level=0).apply(lambda g: round(100*g/g.sum(), 2))\
+            .rename(columns={'counts': '%'})\
+            .reset_index()
+        d = d.merge(d_pct, how='inner', on=group_by)
+        d['percentile'] = pd.qcut(d['%'], q=100, labels=False, duplicates='drop')
+        return d
 
-    this_months_weekday_by_interval = this_months_weekday_and_time.sort_values(by=['interval', 'counts'], ascending=[True, False])
+    by_day = df.groupby(['district', 'day']).size().reset_index(name='counts')
+    # Percent of each district for each day, calculated by the total of all districts for that day
+    by_day = calculate_grouped_percentage_and_centile(by_day, group_by=['day', 'district'])
+    # Create a day ordering list so that the first day is today. 
+    def _reorder(lst: List, idx: int) -> List:
+        n = len(lst)
+        if idx > n:
+            raise RuntimeError(f'Index {idx} out of range (0-{n-1})')
+        if idx == 0:
+            return lst
+        return lst[idx:] + lst[0:idx]
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    # Make day a categorical variable and set order so that we can show results sorted from Monday to Sunday
+    by_day['day'] = pd.Categorical(by_day['day'], _reorder(days, now.weekday()))
+    by_day.sort_values(by=['day', '%'], ascending=[True, False], inplace=True)
+
+    by_time = df.groupby(['district', 'interval']).size().reset_index(name='counts')
+    # Percent of each district for each time interval, calculated by the total of all districts for that time interval
+    by_time = calculate_grouped_percentage_and_centile(by_time, group_by=['interval', 'district'])
+    # Same as above, make current interval the first interval
+    intervals_str = [i[0] + ' - ' + i[1] for i in intervals]
+    by_time['interval'] = pd.Categorical(by_time['interval'], _reorder(intervals_str, intervals_str.index(interval_now)))
+    by_time.sort_values(by=['interval', '%'], ascending=[True, False], inplace=True)
+
+    by_time_and_day = df.groupby(['district', 'interval', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    by_time_and_day['interval'] = pd.Categorical(by_time_and_day['interval'], _reorder(intervals_str, intervals_str.index(interval_now)))
+    by_time_and_day['day'] = pd.Categorical(by_time_and_day['day'], _reorder(days, now.weekday()))
+    by_time_and_day.sort_values(by=['day', 'interval', 'counts'], ascending=[True, True, False], inplace=True)
+
+    by_month_and_day = df.groupby(['district', 'month', 'day']).size().reset_index(name='counts').sort_values(by='counts', ascending=False)
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    by_month_and_day['month'] = pd.Categorical(by_month_and_day['month'], _reorder(months, now.month-1))
+    by_month_and_day['day'] = pd.Categorical(by_month_and_day['day'], _reorder(days, now.weekday()))
+    by_month_and_day.sort_values(by=['month', 'day', 'counts'], ascending=[True, True, False], inplace=True)
 
     month = calendar.month_name[datetime.now().month]
     weekday = calendar.day_name[datetime.now().weekday()]
 
     data = {
-        'all_freqs': all_freqs,
-        'by_month': by_month,
         'by_day': by_day,
         'by_time': by_time,
         'by_time_and_day': by_time_and_day,
         'by_month_and_day': by_month_and_day,
-        'this_month': this_month,
-        'this_weekday': this_weekday,
-        'this_time': this_time,
-        'this_months_weekday': this_months_weekday,
-        'this_months_weekday_by_interval': this_months_weekday_by_interval
+        'all_freqs': all_freqs
     }
 
     return render_template('results.html', data=data, month=month, weekday=weekday, top_n=TOP_N_RESULTS, district=district)
