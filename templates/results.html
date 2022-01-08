@@ -17,8 +17,9 @@
                     <a href="#" class="dropdown-item" data-target="t2">By day and time</a>
                     <a href="#" class="dropdown-item" data-target="t3">By month and day</a>
                     <a href="#" class="dropdown-item" data-target="t4">Ungrouped</a>
+                    {# <a href="#" class="dropdown-item" data-target="t5">Top ranking</a> #}
                     <hr class="dropdown-divider">
-                    <a href="#" class="dropdown-item" data-target="t5">By area code</a>
+                    <a href="#" class="dropdown-item" data-target="t6">By area code</a>
                 </div>
             </div>
         </div>
@@ -76,7 +77,18 @@
                 {% endif %}
             </div>
 
+            {# 
             <div id="t5" class="hidden">
+                <h4 style="font-weight: bolder;">Top ranking districts</h4>
+                {% if data['top_ranking'].shape[0] > 0 %}
+                {{ data['all_freqs'].to_html(index=False, border=0, classes=('table', 'is-narrow', 'is-striped', 'is-hoverable'))|safe }}
+                {% else %}
+                <p>No data to show</p>
+                {% endif %}
+            </div>
+            #} 
+
+            <div id="t6" class="hidden">
                 <h4 style="font-weight: bolder;">Enter an area code</h4>
                 <div class="columns">
                     <div class="column is-4">

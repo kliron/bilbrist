@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="columns is-centered is-mobile">
+    <div class="column">
+        <h3 class="title is-3">How everything is calculated</h2>
+        
+        <h4 class="title is-4">Percentages</h3>
+        <p class="content">
+            In all grouped results the percentage (%) column is calculated as the percent of a district's counts to
+            the total counts of its group. For example in 'Frequencies by day', results are grouped by day, 
+            so each percentage for every district is calculated to the total for all districts on that specific day. 
+        </p>
+        <p class="content">
+            Because we are rounding off percentages to 2 decimal points, their sum across every group is very near
+             but not exactly 100.
+        </p>
+
+        <h4 class="title is-4">Decile</h3>
+        <p class="content">
+            Deciles are calculated by discretizing count sums into 10 equal-length bins, sorted from lowest to 
+            highest. Each row is then assigned its bin number as a rank. Bin numbers start at 0. Since the range
+            of each bin must be unique, any duplicate bins caused by duplicate values are dropped, so the maximum
+            rank may be lower than 9. The values in dropped bins are redistributed to the remaining bins and so 
+            the bins may ultimately have unequal lengths.
+        </p>
+
+        <h4 class="title is-4">Rank</h3>
+        <p class="content">
+            Rank is calculated by scoring each row by its position in the sorted group. Scoring is done by a lowest-rank-is-best logic. 
+            For example if district X's position in the 'Monday' group in 'Frequencies by day' is in row 3, it means it is the third best 
+            district and it will have a rank of 3.
+        </p>
+
+        <h4 class="title is-4">Curent time/day/month is displayed by default</h2>
+            <p>The current time interval, week day and month are always displayed at the top of each list. If a time 
+                segment (interval, day or month) does not have any results, the immediately next segment is shown first,
+                in logical order (eg. if Sunday has no results Monday is shown first).
+        </p>
+    </div>
+</div>
+{% endblock %}
+

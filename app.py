@@ -1,4 +1,5 @@
 from flask import Flask, request, url_for, redirect, render_template, flash, g, Response
+from pandas._libs.tslibs.timedeltas import ints_to_pytimedelta
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -25,7 +26,6 @@ QUERY_LIMIT = 50
 district_extractor_rgx = re.compile(r'([0-9]{3})\s*[\{\[\(][^0-9.]*?rt', re.MULTILINE)
 CSV_SEP = ','
 RESULTS_DIR = 'results'
-TOP_N_RESULTS = 40
 
 with open('secrets/httpauth.txt', 'r') as f:
     passw = f.read().replace('\n', '')
@@ -210,12 +210,17 @@ def results():
 
     con = get_db()
     cur = con.cursor()
-    sql = 'SELECT time, day, month, district, date, rowid From bilbrist' if district is None else \
-        'SELECT time, day, month, district, date, rowid From bilbrist where district = ?'
+    sql = 'SELECT time, day, month, district, date, rowid FROM bilbrist' if district is None else \
+        'SELECT time, day, month, district, date, rowid FROM bilbrist where district = ?'
     params = [] if district is None else [district]
     res = cur.execute(sql, params)
     cols = [col[0] for col in res.description]
     df = pd.DataFrame.from_records(data=res.fetchall(), columns=cols)
+
+    if df.shape[0] < 1:
+        flash(f'No results for district "{district}" found', category='error')
+        return redirect(f'/results')
+
 
     # Concatenate area code and district name since they are 1-to-1 mappings, they are essentially a single variable
     areas = df['district'].apply(lambda d: district_names.get(d, ['Unknown'])[0])
@@ -240,50 +245,44 @@ def results():
     mask = [df.index.isin(df.between_time(intervals[i][0], intervals[i][1], include_start=True, include_end=False).index) for i in range(0, len(intervals))]
 
     df['interval'] = np.where(mask[0], ' - '.join(intervals[0]),
-                              np.where(mask[1], ' - '.join(intervals[1]),
-                                       np.where(mask[2], ' - '.join(intervals[2]),
-                                                np.where(mask[3], ' - '.join(intervals[3]),
-                                                         np.where(mask[4], ' - '.join(intervals[4]),
-                                                                  np.where(mask[5], ' - '.join(intervals[5]),
-                                                                           np.where(mask[6], ' - '.join(intervals[6]),
-                                                                                    np.where(mask[7], ' - '.join(intervals[7]),
-                                                                                             np.where(mask[8], ' - '.join(intervals[8]),
-                                                                                                      np.where(mask[9], ' - '.join(intervals[9]),
-                                                                                                               np.where(mask[10], ' - '.join(intervals[10]),
-                                                                                                                        np.where(mask[11], ' - '.join(intervals[11]),
-                                                                                                                                 np.where(mask[12], ' - '.join(intervals[12]),
-                                                                                                                                          np.where(mask[13], ' - '.join(intervals[13]),
-                                                                                                                                                   np.where(mask[14], ' - '.join(intervals[14]),
-                                                                                                                                                            np.where(mask[15], ' - '.join(intervals[15]),
-                                                                                                                                                                     np.where(mask[16], ' - '.join(intervals[16]),
-                                                                                                                                                                              np.where(mask[17], ' - '.join(intervals[17]),
-                                                                                                                                                                                       np.where(mask[18], ' - '.join(intervals[18]),
-                                                                                                                                                                                                np.where(mask[19], ' - '.join(intervals[19]),
-                                                                                                                                                                                                         np.where(mask[20], ' - '.join(intervals[20]),
-                                                                                                                                                                                                                  np.where(mask[21], ' - '.join(intervals[21]),
-                                                                                                                                                                                                                           np.where(mask[22], ' - '.join(intervals[22]),
-                                                                                                                                                                                                                                np.where(mask[23], ' - '.join(intervals[23]),
-                                                                                                                                                                                                                                        'BUG! No time interval found'))))))))))))))))))))))))
+                     np.where(mask[1], ' - '.join(intervals[1]),
+                     np.where(mask[2], ' - '.join(intervals[2]),
+                     np.where(mask[3], ' - '.join(intervals[3]),
+                     np.where(mask[4], ' - '.join(intervals[4]),
+                     np.where(mask[5], ' - '.join(intervals[5]),
+                     np.where(mask[6], ' - '.join(intervals[6]),
+                     np.where(mask[7], ' - '.join(intervals[7]),
+                     np.where(mask[8], ' - '.join(intervals[8]),
+                     np.where(mask[9], ' - '.join(intervals[9]),
+                     np.where(mask[10], ' - '.join(intervals[10]),
+                     np.where(mask[11], ' - '.join(intervals[11]),
+                     np.where(mask[12], ' - '.join(intervals[12]),
+                     np.where(mask[13], ' - '.join(intervals[13]),
+                     np.where(mask[14], ' - '.join(intervals[14]),
+                     np.where(mask[15], ' - '.join(intervals[15]),
+                     np.where(mask[16], ' - '.join(intervals[16]),
+                     np.where(mask[17], ' - '.join(intervals[17]),
+                     np.where(mask[18], ' - '.join(intervals[18]),
+                     np.where(mask[19], ' - '.join(intervals[19]),
+                     np.where(mask[20], ' - '.join(intervals[20]),
+                     np.where(mask[21], ' - '.join(intervals[21]),
+                     np.where(mask[22], ' - '.join(intervals[22]),
+                     np.where(mask[23], ' - '.join(intervals[23]),
+                     'BUG! No time interval found'))))))))))))))))))))))))
 
-    # Sort by district, all days and all months
-    all_freqs = df.groupby(['district']).size().reset_index(name='counts')
-    # Percent of all frequencies
-    all_freqs['%'] = round(100 * all_freqs['counts'] / all_freqs['counts'].sum(), 2)
-    all_freqs['percentile'] = pd.qcut(all_freqs['%'], q=100, labels=False, duplicates='drop')
-    all_freqs.sort_values(by='%', inplace=True, ascending=False)
-
-    def calculate_grouped_percentage_and_centile(d: pd.DataFrame, group_by: List[str]) -> pd.DataFrame:
-        d_pct = d.groupby(group_by).agg({'counts': 'sum'})\
-            .groupby(level=0).apply(lambda g: round(100*g/g.sum(), 2))\
-            .rename(columns={'counts': '%'})\
-            .reset_index()
+    def calculate_grouped_percentage_rank_and_centile(d: pd.DataFrame, group_by: List[str]) -> pd.DataFrame:
+        d_pct = d.groupby(group_by).agg({'counts': 'sum'})
+        d_lvl0 = d_pct.groupby(level=0)
+        d_pct = d_lvl0.apply(lambda g: round(100*g/g.sum(), 2)).rename(columns=({'counts': '%'})).reset_index()
+        d_rnk = d_lvl0.apply(lambda g: g.rank(method='dense', ascending=False).astype(int)).rename(columns=({'counts': 'rank'})).reset_index()
         d = d.merge(d_pct, how='inner', on=group_by)
-        d['percentile'] = pd.qcut(d['%'], q=100, labels=False, duplicates='drop')
+        d = d.merge(d_rnk, how='inner', on=group_by)
+        d['decile'] = pd.qcut(d['counts'], q=10, labels=False, duplicates='drop')
         return d
 
     by_day = df.groupby(['district', 'day']).size().reset_index(name='counts')
     # Percent of each district for each day, calculated by the total of all districts for that day
-    by_day = calculate_grouped_percentage_and_centile(by_day, group_by=['day', 'district'])
+    by_day = calculate_grouped_percentage_rank_and_centile(by_day, group_by=['day', 'district'])
     # Create a day ordering list so that the first day is today. 
     def _reorder(lst: List, idx: int) -> List:
         n = len(lst)
@@ -300,7 +299,7 @@ def results():
 
     by_time = df.groupby(['district', 'interval']).size().reset_index(name='counts')
     # Percent of each district for each time interval, calculated by the total of all districts for that time interval
-    by_time = calculate_grouped_percentage_and_centile(by_time, group_by=['interval', 'district'])
+    by_time = calculate_grouped_percentage_rank_and_centile(by_time, group_by=['interval', 'district'])
     # Same as above, make current interval the first interval
     intervals_str = [i[0] + ' - ' + i[1] for i in intervals]
     by_time['interval'] = pd.Categorical(by_time['interval'], _reorder(intervals_str, intervals_str.index(interval_now)))
@@ -317,18 +316,25 @@ def results():
     by_month_and_day['day'] = pd.Categorical(by_month_and_day['day'], _reorder(days, now.weekday()))
     by_month_and_day.sort_values(by=['month', 'day', 'counts'], ascending=[True, True, False], inplace=True)
 
-    month = calendar.month_name[datetime.now().month]
-    weekday = calendar.day_name[datetime.now().weekday()]
+    all_freqs = df.groupby(['district']).size().reset_index(name='counts')
+    all_freqs['%'] = round(100 * all_freqs['counts'] / all_freqs['counts'].sum(), 2)
+    all_freqs['decile'] = pd.qcut(all_freqs['counts'], q=10, labels=False, duplicates='drop')
+    all_freqs['rank'] = all_freqs['counts'].rank(method='dense', ascending=False).astype(int)
+    all_freqs.sort_values(by='counts', inplace=True, ascending=False)
 
     data = {
-        'by_day': by_day,
         'by_time': by_time,
+        'by_day': by_day,
         'by_time_and_day': by_time_and_day,
         'by_month_and_day': by_month_and_day,
         'all_freqs': all_freqs
     }
 
-    return render_template('results.html', data=data, month=month, weekday=weekday, top_n=TOP_N_RESULTS, district=district)
+    return render_template('results.html', 
+                           data=data, 
+                           month=calendar.month_name[datetime.now().month], 
+                           weekday=calendar.day_name[datetime.now().weekday()], 
+                           district=district)
 
 
 @app.route('/results_for_district', methods=['POST'])
@@ -337,6 +343,12 @@ def results_for_district():
     district = request.form['district']
     return redirect(f'/results?d={district}')
 
+
+@app.route('/info')
+@auth.login_required
+def info_page():
+    return render_template('info.html')
+    
 
 if __name__ == "__main__":
     # To run in dev mode:
