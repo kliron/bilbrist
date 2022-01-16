@@ -27,9 +27,15 @@
         <br/>
         <br/>
 
-        <h4>Showing results for {{ 'district ' + district if district else 'all districts'}}</h4>
+        <div class="column">
+            <h4>Showing results for {{ 'district ' + district if district else 'all districts'}}</h4>
+        </div>
 
-        <br/>
+        <div class="column is-4 hidden" id="max-rank-input-wrapper">
+            <label for="max-rank">Set max row rank to show:
+                <input type="number" id="max-rank" class="input is-small" size=3 />
+            </label>
+        </div>
 
         <div id="tab-content">
             <div id="t0">
@@ -77,7 +83,7 @@
                 {% endif %}
             </div>
 
-            {# 
+            {#
             <div id="t5" class="hidden">
                 <h4 style="font-weight: bolder;">Top ranking districts</h4>
                 {% if data['top_ranking'].shape[0] > 0 %}
@@ -86,7 +92,7 @@
                 <p>No data to show</p>
                 {% endif %}
             </div>
-            #} 
+            #}
 
             <div id="t6" class="hidden">
                 <h4 style="font-weight: bolder;">Enter an area code</h4>
@@ -128,16 +134,50 @@
         });
 
         document.querySelectorAll('#tab-selector > a').forEach(el => {
-            let target_id = el.getAttribute('data-target');
+            let targetId = el.getAttribute('data-target');
             el.addEventListener('click', ev => {
                 document.querySelectorAll('#tab-selector > a.is-active')[0].classList.remove('is-active');
                 ev.currentTarget.classList.add('is-active');
                 document.querySelectorAll('#tab-content > div').forEach(el => el.classList.add('hidden'));
-                document.getElementById(target_id).classList.remove('hidden');
-            })
+                document.getElementById(targetId).classList.remove('hidden');
+                filterRank();
+            });
         });
+
+        document.querySelector('#max-rank').addEventListener('input', filterRank);
+
+        filterRank();
     });
 
+    function filterRank() {
+        // If the visible table has a column named "rank", show max-rank input
+        let showMaxSelector = false;
+        document.querySelectorAll('div:not(.hidden) > table > thead > tr > th').forEach(th => {
+            if (th.innerHTML == "rank") {
+                showMaxSelector = true;
+            }
+        });
+
+        if (showMaxSelector) {
+            document.querySelector('#max-rank-input-wrapper').classList.remove('hidden');
+        } else {
+            document.querySelector('#max-rank-input-wrapper').classList.add('hidden');
+            return;
+        }
+
+        let maxRank = document.querySelector('#max-rank').value;
+        document.querySelectorAll('div:not(.hidden) > table > tbody > tr').forEach((tr, idx) => {
+            tr.classList.remove('hidden');
+            // 'rank' is in position 5 in the row, if that ever changes
+            // you will need to change the line below:
+            let rank = parseInt(tr.querySelector('td:nth-child(5)').innerHTML)
+            if (maxRank && (rank > maxRank)) {
+                tr.classList.add('hidden');
+            } else {
+                tr.classList.remove('hidden');
+            }
+        });
+    }
 
 </script>
 {% endblock %}
