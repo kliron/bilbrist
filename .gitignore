@@ -2,4 +2,3 @@ secrets
 .idea
 __pycache__/
 bilbrist.iml
-db.sqlite
